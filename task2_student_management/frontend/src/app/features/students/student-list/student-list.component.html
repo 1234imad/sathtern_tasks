@@ -1,0 +1,205 @@
+<div class="container-fluid py-4">
+  <!-- ============================================================ -->
+  <!-- En-tête -->
+  <!-- ============================================================ -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h3 mb-0">
+        <i class="bi bi-mortarboard-fill text-primary"></i>
+        Gestion des étudiants
+      </h1>
+      <small class="text-muted" *ngIf="getCurrentUser() as user">
+        Connecté en tant que <strong>{{ user.username }}</strong>
+      </small>
+    </div>
+    <div>
+      <a routerLink="/students/new" class="btn btn-primary me-2">
+        <i class="bi bi-plus-lg"></i> Nouvel étudiant
+      </a>
+      <button class="btn btn-outline-danger" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i> Déconnexion
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- Filtres -->
+  <!-- ============================================================ -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <!-- Recherche -->
+        <div class="col-md-5">
+          <label class="form-label small text-muted">Recherche</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Nom, prénom ou email..."
+              [ngModel]="search"
+              (ngModelChange)="onSearchChange($event)"
+            />
+          </div>
+        </div>
+
+        <!-- Filière -->
+        <div class="col-md-3">
+          <label class="form-label small text-muted">Filière</label>
+          <select
+            class="form-select"
+            [(ngModel)]="major"
+            (ngModelChange)="onFilterChange()">
+            <option value="">Toutes les filières</option>
+            <option *ngFor="let m of majors" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+
+        <!-- Tri -->
+        <div class="col-md-2">
+          <label class="form-label small text-muted">Trier par</label>
+          <select
+            class="form-select"
+            [(ngModel)]="sortBy"
+            (ngModelChange)="onFilterChange()">
+            <option value="name">Nom</option>
+            <option value="gpa">GPA (desc)</option>
+            <option value="enrollment">Date d'inscription</option>
+            <option value="major">Filière</option>
+          </select>
+        </div>
+
+        <!-- Total -->
+        <div class="col-md-2 d-flex align-items-end">
+          <div class="text-muted small">
+            <i class="bi bi-people"></i>
+            <strong>{{ totalCount }}</strong> étudiant(s)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- Loading -->
+  <!-- ============================================================ -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2 text-muted">Chargement...</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- Erreur -->
+  <!-- ============================================================ -->
+  <div *ngIf="error && !loading" class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- Liste vide -->
+  <!-- ============================================================ -->
+  <div *ngIf="!loading && students.length === 0" class="text-center py-5">
+    <i class="bi bi-inbox display-1 text-muted"></i>
+    <p class="text-muted mt-3">Aucun étudiant trouvé.</p>
+    <a routerLink="/students/new" class="btn btn-primary">
+      <i class="bi bi-plus-lg"></i> Ajouter un étudiant
+    </a>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- Tableau -->
+  <!-- ============================================================ -->
+  <div *ngIf="!loading && students.length > 0" class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Filière</th>
+            <th class="text-center">GPA</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let student of students">
+            <td class="fw-bold">{{ student.lastName }}</td>
+            <td>{{ student.firstName }}</td>
+            <td>
+              <a href="mailto:{{ student.email }}" class="text-decoration-none">
+                {{ student.email }}
+              </a>
+            </td>
+            <td>{{ student.phone }}</td>
+            <td>
+              <span class="badge bg-secondary">{{ student.major }}</span>
+            </td>
+            <td class="text-center">
+              <span
+                class="badge"
+                [ngClass]="{
+                  'bg-success': student.gpa >= 3.5,
+                  'bg-info': student.gpa >= 3 && student.gpa < 3.5,
+                  'bg-warning text-dark': student.gpa >= 2 && student.gpa < 3,
+                  'bg-danger': student.gpa < 2
+                }">
+                {{ student.gpa.toFixed(2) }}
+              </span>
+            </td>
+            <td class="text-center">
+              <a
+                [routerLink]="['/students', student.id, 'edit']"
+                class="btn btn-sm btn-outline-primary me-1"
+                title="Modifier">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <button
+                class="btn btn-sm btn-outline-danger"
+                (click)="deleteStudent(student.id)"
+                title="Supprimer">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Pagination -->
+    <!-- ============================================================ -->
+    <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+      <small class="text-muted">
+        Page {{ page }} / {{ totalPages }} — {{ totalCount }} étudiant(s) au total
+      </small>
+
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          <!-- Bouton précédent -->
+          <li class="page-item" [class.disabled]="page === 1">
+            <button class="page-link" (click)="previousPage()">
+              <i class="bi bi-chevron-left"></i> Précédent
+            </button>
+          </li>
+
+          <!-- Numéros de page -->
+          <li
+            class="page-item"
+            *ngFor="let p of getPages()"
+            [class.active]="p === page">
+            <button class="page-link" (click)="goToPage(p)">{{ p }}</button>
+          </li>
+
+          <!-- Bouton suivant -->
+          <li class="page-item" [class.disabled]="page === totalPages">
+            <button class="page-link" (click)="nextPage()">
+              Suivant <i class="bi bi-chevron-right"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,21 @@
+.card {
+  border-radius: 0.75rem;
+  border: none;
+}
+
+.form-control, .form-select {
+  border-radius: 0.5rem;
+  padding: 0.65rem 0.85rem;
+}
+
+.btn {
+  border-radius: 0.5rem;
+  padding: 0.65rem 1rem;
+  font-weight: 500;
+}
+
+label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #495057;
+}

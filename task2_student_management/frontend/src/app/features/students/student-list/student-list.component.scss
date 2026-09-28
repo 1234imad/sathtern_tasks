@@ -1,0 +1,47 @@
+.table {
+  th {
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+  }
+
+  td {
+    vertical-align: middle;
+  }
+
+  tbody tr {
+    transition: background 0.15s ease;
+  }
+}
+
+.badge {
+  font-weight: 500;
+  padding: 0.4em 0.75em;
+}
+
+.card {
+  border-radius: 0.75rem;
+  border: none;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+}
+
+.pagination .page-link {
+  border-radius: 0.375rem;
+  margin: 0 2px;
+  border: none;
+  color: #495057;
+
+  &:hover {
+    background-color: #e9ecef;
+  }
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #0d6efd;
+  color: white;
+}
